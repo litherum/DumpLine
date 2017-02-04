@@ -139,16 +139,16 @@ int main() {
 		IDWriteNumberSubstitution* numberSubstitution(nullptr);
 		std::vector<UINT16> clusterMap(length);
 		std::vector<DWRITE_SHAPING_TEXT_PROPERTIES> textProps(length);
-		UINT32 maxGlyphCount(2);
 		std::vector<UINT16> glyphs;
 		std::vector<DWRITE_SHAPING_GLYPH_PROPERTIES> glyphProps;
 		UINT32 actualGlyphCount;
-		do {
+		hr = HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER);
+		for (UINT32 maxGlyphCount(2); hr == HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER); maxGlyphCount *= 2) {
 			glyphs = std::vector<UINT16>(maxGlyphCount);
 			glyphProps = std::vector<DWRITE_SHAPING_GLYPH_PROPERTIES>(maxGlyphCount);
 			hr = textAnalyzer->GetGlyphs(textString + position, length, fontFace.Get(), isSideways, isRightToLeft, &scriptAnalysis, localeName, numberSubstitution, nullptr, nullptr, 0, maxGlyphCount, clusterMap.data(), textProps.data(), glyphs.data(), glyphProps.data(), &actualGlyphCount);
 			maxGlyphCount *= 2;
-		} while (hr == HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER));
+		}
 		assert(SUCCEEDED(hr));
 		std::vector<FLOAT> advances(actualGlyphCount);
 		std::vector<DWRITE_GLYPH_OFFSET> offsets(actualGlyphCount);
